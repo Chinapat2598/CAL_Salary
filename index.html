@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compensation & Net Pay Calculator — HO (Silom) vs SITE</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F8FAFC;
+            color: #0F172A;
+            -webkit-font-smoothing: antialiased;
+        }
+        .tabular-nums {
+            font-variant-numeric: tabular-nums;
+        }
+        /* Hide number input arrows */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        .pill-input {
+            transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .pill-input:hover {
+            border-color: #CBD5E1;
+            background-color: #FFFFFF;
+        }
+        .pill-input:focus {
+            background-color: #FFFFFF;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+            outline: none;
+        }
+        .pill-input-site:focus {
+            border-color: #10B981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- ===================================================================== -->
+    <!-- MAIN DASHBOARD APPLICATION                                            -->
+    <!-- ===================================================================== -->
+    <div id="mainApp" class="flex-1 flex flex-col">
+        
+        <!-- Top Navigation Bar -->
+        <nav class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-sm">
+                        <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-400"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-display text-sm sm:text-base font-bold text-slate-900 leading-tight">Compensation Analyzer</h1>
+                        <p class="text-[11px] text-slate-500 hidden sm:block">HO (Silom) vs. SITE Assignment Comparison</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="confirmReset()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-700 text-xs font-semibold transition flex items-center gap-1.5 border border-slate-200/60">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                        <span>Reset Defaults</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Container -->
+        <main class="max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+
+            <!-- ============================================================= -->
+            <!-- HERO SECTION: EXECUTIVE SUMMARY COMPARISON                    -->
+            <!-- ============================================================= -->
+            <section aria-label="Executive Summary">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                    
+                    <!-- HO (Silom) Net Take-Home Card -->
+                    <div class="md:col-span-4 bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold">
+                                <i data-lucide="building-2" class="w-3.5 h-3.5"></i> HO (Silom)
+                            </span>
+                            <span class="text-[11px] font-medium text-slate-400">Head Office</span>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500 mb-0.5">Net Take-Home Pay</p>
+                        <div class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tabular-nums tracking-tight" id="hero_net_ho">
+                            ฿0.00
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs tabular-nums">
+                            <div>
+                                <span class="text-slate-400 block text-[11px]">Gross Income</span>
+                                <span class="font-semibold text-slate-700" id="hero_gross_ho">฿0.00</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-slate-400 block text-[11px]">Deductions</span>
+                                <span class="font-semibold text-rose-600" id="hero_deduct_ho">-฿0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SITE Net Take-Home Card -->
+                    <div class="md:col-span-4 bg-white rounded-2xl p-5 border border-emerald-200/80 shadow-sm relative overflow-hidden">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-semibold">
+                                <i data-lucide="hard-hat" class="w-3.5 h-3.5"></i> SITE
+                            </span>
+                            <span class="text-[11px] font-medium text-emerald-600">Field Assignment</span>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500 mb-0.5">Net Take-Home Pay</p>
+                        <div class="font-display text-2xl sm:text-3xl font-extrabold text-emerald-700 tabular-nums tracking-tight" id="hero_net_site">
+                            ฿0.00
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs tabular-nums">
+                            <div>
+                                <span class="text-slate-400 block text-[11px]">Gross Income</span>
+                                <span class="font-semibold text-slate-700" id="hero_gross_site">฿0.00</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-slate-400 block text-[11px]">Deductions</span>
+                                <span class="font-semibold text-rose-600" id="hero_deduct_site">-฿0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Net Advantage / Variance Card -->
+                    <div class="md:col-span-4 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 rounded-2xl p-5 text-white shadow-md flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Net Difference</span>
+                                <span id="hero_diff_pct" class="px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-xs font-bold tabular-nums">
+                                    0.0%
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-400 mb-0.5">SITE vs. HO Advantage</p>
+                            <div class="font-display text-2xl sm:text-3xl font-extrabold text-slate-200 tabular-nums tracking-tight" id="hero_diff_amount">
+                                ฿0.00
+                            </div>
+                        </div>
+
+                        <!-- Stacked Visual Breakdown Bars -->
+                        <div class="mt-4 pt-3 border-t border-slate-800 space-y-2">
+                            <div>
+                                <div class="flex justify-between text-[10px] text-slate-400 mb-1">
+                                    <span>HO Mix</span>
+                                    <span id="bar_label_ho" class="tabular-nums">Fixed 0% • Variable 0%</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden flex">
+                                    <div id="bar_ho_base" class="bg-blue-500 h-full transition-all duration-300" style="width: 0%"></div>
+                                    <div id="bar_ho_ot" class="bg-sky-300 h-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-[10px] text-slate-400 mb-1">
+                                    <span>SITE Mix</span>
+                                    <span id="bar_label_site" class="tabular-nums">Fixed 0% • Variable 0%</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden flex">
+                                    <div id="bar_site_base" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
+                                    <div id="bar_site_ot" class="bg-teal-300 h-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================= -->
+            <!-- SECTION 01: BASE & FIXED ALLOWANCES                           -->
+            <!-- ============================================================= -->
+            <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2 bg-slate-50/60">
+                    <div>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Section 01</span>
+                        <h2 class="font-display text-base font-bold text-slate-900">Base & Fixed Allowances</h2>
+                    </div>
+                    <div class="hidden sm:grid grid-cols-2 gap-4 w-72 text-center text-xs font-bold">
+                        <span class="text-blue-700 bg-blue-50 py-1 rounded-lg">HO (Silom)</span>
+                        <span class="text-emerald-700 bg-emerald-50 py-1 rounded-lg">SITE</span>
+                    </div>
+                </div>
+
+                <div class="divide-y divide-slate-100">
+                    <!-- (1) Base Salary -->
+                    <div class="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
+                        <div>
+                            <div class="text-sm font-semibold text-slate-800">(1) Base Salary</div>
+                            <div class="text-xs text-slate-400">Included in OT, SSO & PVD base calculation</div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 sm:w-72">
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-blue-600 mb-1">HO (Silom)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="500" min="0" id="base_ho" data-key="base_ho" value="0"
+                                        class="pill-input w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-emerald-600 mb-1">SITE</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="500" min="0" id="base_site" data-key="base_site" value="0"
+                                        class="pill-input pill-input-site w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- (2) Transportation -->
+                    <div class="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
+                        <div>
+                            <div class="text-sm font-semibold text-slate-800">(2) Transportation</div>
+                            <div class="text-xs text-slate-400">Included in OT hourly rate base</div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 sm:w-72">
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-blue-600 mb-1">HO (Silom)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="100" min="0" id="travel_ho" data-key="travel_ho" value="2000"
+                                        class="pill-input w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-emerald-600 mb-1">SITE</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="100" min="0" id="travel_site" data-key="travel_site" value="1700"
+                                        class="pill-input pill-input-site w-full bg-emerald-50/40 border border-emerald-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-emerald-900">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- (3) Phone Allowance -->
+                    <div class="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
+                        <div>
+                            <div class="text-sm font-semibold text-slate-800">(3) Phone Allowance</div>
+                            <div class="text-xs text-slate-400">Included in OT hourly rate base</div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 sm:w-72">
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-blue-600 mb-1">HO (Silom)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="100" min="0" id="phone_ho" data-key="phone_ho" value="0"
+                                        class="pill-input w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-emerald-600 mb-1">SITE</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="100" min="0" id="phone_site" data-key="phone_site" value="0"
+                                        class="pill-input pill-input-site w-full bg-emerald-50/40 border border-emerald-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-emerald-900">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- (4) Upcountry Site Allowance -->
+                    <div class="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
+                        <div>
+                            <div class="text-sm font-semibold text-slate-800">(4) Upcountry Site Allowance</div>
+                            <div class="text-xs text-slate-400">Included in OT hourly rate base</div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 sm:w-72">
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-blue-600 mb-1">HO (Silom)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="100" min="0" id="upcountry_ho" data-key="upcountry_ho" value="0"
+                                        class="pill-input w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-emerald-600 mb-1">SITE</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="100" min="0" id="upcountry_site" data-key="upcountry_site" value="1500"
+                                        class="pill-input pill-input-site w-full bg-emerald-50/40 border border-emerald-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-emerald-900">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- (5) Accommodation Allowance -->
+                    <div class="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
+                        <div>
+                            <div class="text-sm font-semibold text-slate-800">(5) Accommodation Allowance</div>
+                            <div class="text-xs text-slate-400">Fixed monthly stipend (excluded from OT base)</div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 sm:w-72">
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-blue-600 mb-1">HO (Silom)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="500" min="0" id="housing_ho" data-key="housing_ho" value="0"
+                                        class="pill-input w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-emerald-600 mb-1">SITE</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="500" min="0" id="housing_site" data-key="housing_site" value="5000"
+                                        class="pill-input pill-input-site w-full bg-emerald-50/40 border border-emerald-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-emerald-900">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================= -->
+            <!-- SECTION 02: OVERTIME (OT) & SHIFT ALLOWANCES                  -->
+            <!-- ============================================================= -->
+            <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/60">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                        <div>
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Section 02</span>
+                            <h2 class="font-display text-base font-bold text-slate-900">(6) Overtime (OT) & Shift Allowances</h2>
+                            <p class="text-xs text-slate-500 mt-0.5 tabular-nums">
+                                Hourly Base [(1)–(4) ÷ 240]: 
+                                <span class="font-semibold text-blue-700">HO ฿<span id="rate_ho_disp">0.00</span>/hr</span> • 
+                                <span class="font-semibold text-emerald-700">SITE ฿<span id="rate_site_disp">0.00</span>/hr</span>
+                            </p>
+                        </div>
+
+                        <!-- OT Total Payout Pill -->
+                        <div class="flex items-center gap-3 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-2xs tabular-nums">
+                            <div>
+                                <span class="block text-[10px] font-semibold text-slate-400 uppercase">HO OT Total</span>
+                                <span class="text-sm font-bold text-blue-700" id="ot_total_ho">฿0.00</span>
+                            </div>
+                            <div class="h-6 w-px bg-slate-200"></div>
+                            <div>
+                                <span class="block text-[10px] font-semibold text-slate-400 uppercase">SITE OT Total</span>
+                                <span class="text-sm font-bold text-emerald-700" id="ot_total_site">฿0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 70-Hour Monthly OT Cap Progress Bar -->
+                    <div class="bg-white p-3 rounded-xl border border-slate-200/80">
+                        <div class="flex items-center justify-between text-xs mb-1.5">
+                            <span class="font-semibold text-slate-700 flex items-center gap-1.5">
+                                <i data-lucide="clock" class="w-3.5 h-3.5 text-indigo-500"></i> Monthly OT Cap Usage (Max 70 hrs)
+                            </span>
+                            <span id="otCapStatusText" class="font-bold tabular-nums text-indigo-600">0 / 70 hrs (0.0%)</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div id="otCapBar" class="h-full bg-indigo-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <p id="otWarningMsg" class="hidden mt-2 text-xs text-amber-700 bg-amber-50 px-2.5 py-1.5 rounded-lg border border-amber-200/80 font-medium flex items-center gap-1.5">
+                            <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i>
+                            <span>Total OT hours exceed the standard 70-hour monthly policy limit.</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="divide-y divide-slate-100">
+                    <!-- Shift 1: Weekend Day 1.0x -->
+                    <div class="px-5 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 text-xs font-bold">1.0x</span>
+                                <span class="text-sm font-semibold text-slate-800">Weekend Day Shift (Sat–Sun)</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-0.5">08:00 – 17:00 regular holiday hours</p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-between md:justify-end gap-4">
+                            <div class="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200">
+                                <button type="button" onclick="stepHours('ot_10_hrs', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center shadow-2xs" aria-label="Decrease 1.0x hours">
+                                    <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <div class="px-2 flex items-center">
+                                    <input type="number" step="0.5" min="0" id="ot_10_hrs" data-key="ot_10_hrs" value="0"
+                                        class="w-12 bg-transparent text-center text-sm font-bold tabular-nums text-slate-900 focus:outline-none">
+                                    <span class="text-[11px] text-slate-500 font-medium">hrs</span>
+                                </div>
+                                <button type="button" onclick="stepHours('ot_10_hrs', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center shadow-2xs" aria-label="Increase 1.0x hours">
+                                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 w-48 text-right tabular-nums">
+                                <div>
+                                    <span class="block text-[10px] text-slate-400">HO (1.0x)</span>
+                                    <span id="ot_10_ho" class="text-sm font-semibold text-slate-700">฿0.00</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] text-slate-400">SITE (1.0x)</span>
+                                    <span id="ot_10_site" class="text-sm font-semibold text-emerald-700">฿0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shift 2: Weekday 1.5x -->
+                    <div class="px-5 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-xs font-bold">1.5x</span>
+                                <span class="text-sm font-semibold text-slate-800">Weekday Overtime (Mon–Fri)</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-0.5">17:00 – 00:00 shift multiplier</p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-between md:justify-end gap-4">
+                            <div class="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200">
+                                <button type="button" onclick="stepHours('ot_15_hrs', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center shadow-2xs" aria-label="Decrease 1.5x hours">
+                                    <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <div class="px-2 flex items-center">
+                                    <input type="number" step="0.5" min="0" id="ot_15_hrs" data-key="ot_15_hrs" value="0"
+                                        class="w-12 bg-transparent text-center text-sm font-bold tabular-nums text-slate-900 focus:outline-none">
+                                    <span class="text-[11px] text-slate-500 font-medium">hrs</span>
+                                </div>
+                                <button type="button" onclick="stepHours('ot_15_hrs', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center shadow-2xs" aria-label="Increase 1.5x hours">
+                                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 w-48 text-right tabular-nums">
+                                <div>
+                                    <span class="block text-[10px] text-slate-400">HO (1.5x)</span>
+                                    <span id="ot_15_ho" class="text-sm font-semibold text-slate-700">฿0.00</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] text-slate-400">SITE (1.5x)</span>
+                                    <span id="ot_15_site" class="text-sm font-semibold text-emerald-700">฿0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shift 3: Weekend Night 3.0x -->
+                    <div class="px-5 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 text-xs font-bold">3.0x</span>
+                                <span class="text-sm font-semibold text-slate-800">Weekend Night Overtime (Sat–Sun)</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-0.5">17:00 – 00:00 holiday overtime rate</p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-between md:justify-end gap-4">
+                            <div class="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200">
+                                <button type="button" onclick="stepHours('ot_30_hrs', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center shadow-2xs" aria-label="Decrease 3.0x hours">
+                                    <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <div class="px-2 flex items-center">
+                                    <input type="number" step="0.5" min="0" id="ot_30_hrs" data-key="ot_30_hrs" value="0"
+                                        class="w-12 bg-transparent text-center text-sm font-bold tabular-nums text-slate-900 focus:outline-none">
+                                    <span class="text-[11px] text-slate-500 font-medium">hrs</span>
+                                </div>
+                                <button type="button" onclick="stepHours('ot_30_hrs', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center shadow-2xs" aria-label="Increase 3.0x hours">
+                                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 w-48 text-right tabular-nums">
+                                <div>
+                                    <span class="block text-[10px] text-slate-400">HO (3.0x)</span>
+                                    <span id="ot_30_ho" class="text-sm font-semibold text-slate-700">฿0.00</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] text-slate-400">SITE (3.0x)</span>
+                                    <span id="ot_30_site" class="text-sm font-semibold text-emerald-700">฿0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================= -->
+            <!-- SECTION 03: VARIABLE ALLOWANCES, MEAL/TRANSPORT & CLAIMS      -->
+            <!-- ============================================================= -->
+            <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/60">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Section 03</span>
+                    <h2 class="font-display text-base font-bold text-slate-900">Variable Allowances, Meal/Transport & Claims</h2>
+                </div>
+
+                <div class="divide-y divide-slate-100">
+                    <!-- (7) OT Meal Allowance -->
+                    <div class="px-5 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
+                        <div>
+                            <div class="text-sm font-semibold text-slate-800">(7) OT Meal Allowance</div>
+                            <div class="text-xs text-slate-400">฿50.00 per qualifying OT day</div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-between md:justify-end gap-4">
+                            <div class="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200">
+                                <button type="button" onclick="stepHours('ot_food_days', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center shadow-2xs" aria-label="Decrease meal days">
+                                    <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <div class="px-2 flex items-center">
+                                    <input type="number" step="1" min="0" id="ot_food_days" data-key="ot_food_days" value="0"
+                                        class="w-10 bg-transparent text-center text-sm font-bold tabular-nums text-slate-900 focus:outline-none">
+                                    <span class="text-[11px] text-slate-500 font-medium">days</span>
+                                </div>
+                                <button type="button" onclick="stepHours('ot_food_days', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center shadow-2xs" aria-label="Increase meal days">
+                                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 w-48 text-right tabular-nums">
+                                <div>
+                                    <span class="block text-[10px] text-slate-400">HO</span>
+                                    <span id="ot_food_ho" class="text-sm font-semibold text-slate-700">฿0.00</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] text-slate-400">SITE</span>
+                                    <span id="ot_food_site" class="text-sm font-semibold text-emerald-700">฿0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- (8) OT Transport Allowance -->
+                    <div class="px-5 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
+                        <div>
+                            <div class="text-sm font-semibold text-slate-800">(8) OT Transport Allowance</div>
+                            <div class="text-xs text-slate-400">฿100.00 per late-night OT day</div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-between md:justify-end gap-4">
+                            <div class="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200">
+                                <button type="button" onclick="stepHours('ot_taxi_days', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center shadow-2xs" aria-label="Decrease transport days">
+                                    <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <div class="px-2 flex items-center">
+                                    <input type="number" step="1" min="0" id="ot_taxi_days" data-key="ot_taxi_days" value="0"
+                                        class="w-10 bg-transparent text-center text-sm font-bold tabular-nums text-slate-900 focus:outline-none">
+                                    <span class="text-[11px] text-slate-500 font-medium">days</span>
+                                </div>
+                                <button type="button" onclick="stepHours('ot_taxi_days', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center shadow-2xs" aria-label="Increase transport days">
+                                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 w-48 text-right tabular-nums">
+                                <div>
+                                    <span class="block text-[10px] text-slate-400">HO</span>
+                                    <span id="ot_taxi_ho" class="text-sm font-semibold text-slate-700">฿0.00</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] text-slate-400">SITE</span>
+                                    <span id="ot_taxi_site" class="text-sm font-semibold text-emerald-700">฿0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- (9) Fuel Reimbursement -->
+                    <div class="px-5 py-4 flex flex-col gap-3.5 hover:bg-slate-50/50 transition">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-semibold text-slate-800">(9) Fuel Reimbursement</span>
+                                    <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200/80 text-[10px] font-semibold">Variable Monthly</span>
+                                </div>
+                                <div class="text-xs text-slate-400 mt-0.5">Variable monthly rate (฿/km × km) or direct lump-sum entry per column</div>
+                            </div>
+                        </div>
+
+                        <!-- Independent HO vs SITE Flexible Fuel Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                            <!-- HO (Silom) Fuel Box -->
+                            <div class="bg-slate-50/80 border border-slate-200/90 rounded-xl p-3.5 space-y-2.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-blue-700 flex items-center gap-1.5">
+                                        <i data-lucide="building-2" class="w-3.5 h-3.5"></i> HO (Silom) Fuel
+                                    </span>
+                                    <div class="inline-flex bg-slate-200/70 p-0.5 rounded-lg">
+                                        <button type="button" onclick="setFuelColMode('ho', 'direct')" id="fuel_mode_ho_direct"
+                                            class="px-2 py-0.5 rounded-md text-[11px] font-semibold transition bg-white text-slate-900 shadow-2xs">
+                                            Direct (฿)
+                                        </button>
+                                        <button type="button" onclick="setFuelColMode('ho', 'rate')" id="fuel_mode_ho_rate"
+                                            class="px-2 py-0.5 rounded-md text-[11px] font-semibold transition text-slate-600 hover:text-slate-900">
+                                            km × Rate
+                                        </button>
+                                    </div>
+                                    <input type="hidden" id="fuel_mode_ho" data-key="fuel_mode_ho" value="direct">
+                                </div>
+
+                                <!-- Rate x Distance Calculator (HO) -->
+                                <div id="fuel_rate_box_ho" class="hidden grid-cols-2 gap-2 pt-1">
+                                    <div>
+                                        <label class="block text-[10px] font-medium text-slate-500 mb-1">Distance (km)</label>
+                                        <input type="number" step="1" min="0" id="fuel_km_ho" data-key="fuel_km_ho" value="0" placeholder="0"
+                                            class="pill-input w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 text-right text-xs font-bold tabular-nums text-slate-900">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-medium text-slate-500 mb-1">Rate (฿/km)</label>
+                                        <input type="number" step="0.5" min="0" id="fuel_rate_ho" data-key="fuel_rate_ho" value="0" placeholder="0"
+                                            class="pill-input w-full bg-white border border-slate-200 rounded-lg py-1.5 px-2.5 text-right text-xs font-bold tabular-nums text-slate-900">
+                                    </div>
+                                </div>
+
+                                <!-- Total Fuel Amount (HO) -->
+                                <div>
+                                    <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+                                        <span id="fuel_sublabel_ho">Monthly fuel amount</span>
+                                        <span id="fuel_formula_ho" class="font-medium text-blue-600 tabular-nums"></span>
+                                    </div>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                        <input type="number" step="10" min="0" id="fuel_ho" data-key="fuel_ho" value="0"
+                                            class="pill-input w-full bg-white border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SITE Fuel Box -->
+                            <div class="bg-emerald-50/35 border border-emerald-200/80 rounded-xl p-3.5 space-y-2.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                                        <i data-lucide="hard-hat" class="w-3.5 h-3.5"></i> SITE Fuel
+                                    </span>
+                                    <div class="inline-flex bg-emerald-100/80 p-0.5 rounded-lg">
+                                        <button type="button" onclick="setFuelColMode('site', 'direct')" id="fuel_mode_site_direct"
+                                            class="px-2 py-0.5 rounded-md text-[11px] font-semibold transition bg-white text-emerald-900 shadow-2xs">
+                                            Direct (฿)
+                                        </button>
+                                        <button type="button" onclick="setFuelColMode('site', 'rate')" id="fuel_mode_site_rate"
+                                            class="px-2 py-0.5 rounded-md text-[11px] font-semibold transition text-emerald-700 hover:text-emerald-900">
+                                            km × Rate
+                                        </button>
+                                    </div>
+                                    <input type="hidden" id="fuel_mode_site" data-key="fuel_mode_site" value="direct">
+                                </div>
+
+                                <!-- Rate x Distance Calculator (SITE) -->
+                                <div id="fuel_rate_box_site" class="hidden grid-cols-2 gap-2 pt-1">
+                                    <div>
+                                        <label class="block text-[10px] font-medium text-emerald-800/70 mb-1">Distance (km)</label>
+                                        <input type="number" step="1" min="0" id="fuel_km_site" data-key="fuel_km_site" value="0" placeholder="0"
+                                            class="pill-input pill-input-site w-full bg-white border border-emerald-200 rounded-lg py-1.5 px-2.5 text-right text-xs font-bold tabular-nums text-emerald-950">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-medium text-emerald-800/70 mb-1">Rate (฿/km)</label>
+                                        <input type="number" step="0.5" min="0" id="fuel_rate_site" data-key="fuel_rate_site" value="0" placeholder="0"
+                                            class="pill-input pill-input-site w-full bg-white border border-emerald-200 rounded-lg py-1.5 px-2.5 text-right text-xs font-bold tabular-nums text-emerald-950">
+                                    </div>
+                                </div>
+
+                                <!-- Total Fuel Amount (SITE) -->
+                                <div>
+                                    <div class="flex items-center justify-between text-[10px] text-emerald-800/60 mb-1">
+                                        <span id="fuel_sublabel_site">Monthly fuel amount</span>
+                                        <span id="fuel_formula_site" class="font-medium text-emerald-700 tabular-nums"></span>
+                                    </div>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-emerald-600/70">฿</span>
+                                        <input type="number" step="10" min="0" id="fuel_site" data-key="fuel_site" value="0"
+                                            class="pill-input pill-input-site w-full bg-white border border-emerald-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-emerald-950">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- (10) Insurance / Lockton Claim -->
+                    <div class="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
+                        <div class="flex-1 pr-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-semibold text-slate-800">(10) Insurance / Lockton Claim</span>
+                                <span class="px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200/80 text-[10px] font-semibold">Non-OT</span>
+                            </div>
+                            <input type="text" id="lockton_note" data-key="lockton_note" value="Medical / Dental / Lockton reimbursement" placeholder="Add claim description..."
+                                class="mt-1 w-full max-w-xs bg-transparent border-b border-dashed border-slate-300 focus:border-indigo-500 text-xs text-slate-500 focus:text-slate-800 focus:outline-none py-0.5">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 sm:w-72">
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-blue-600 mb-1">HO (Silom)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="100" min="0" id="lockton_ho" data-key="lockton_ho" value="0"
+                                        class="pill-input w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-emerald-600 mb-1">SITE</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="100" min="0" id="lockton_site" data-key="lockton_site" value="0"
+                                        class="pill-input pill-input-site w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Custom Extra Income Rows Container -->
+                    <div id="customIncomeList" class="divide-y divide-slate-100"></div>
+
+                    <!-- Add Custom Income Row Bar -->
+                    <div class="px-5 py-2.5 bg-slate-50/40 flex items-center justify-between gap-2">
+                        <span class="text-xs text-slate-400">Add bonuses, reimbursements, or other non-OT income</span>
+                        <button type="button" onclick="addCustomRow('income')"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition border border-indigo-200/70 shrink-0">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Other Income
+                        </button>
+                    </div>
+
+                    <!-- Gross Income Summary Bar -->
+                    <div class="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
+                        <span class="text-xs sm:text-sm font-bold tracking-wide uppercase text-slate-300">Total Gross Income</span>
+                        <div class="grid grid-cols-2 gap-4 sm:w-72 text-right tabular-nums">
+                            <div>
+                                <span class="block text-[10px] text-slate-400">HO (Silom)</span>
+                                <span id="total_income_ho" class="text-sm sm:text-base font-bold text-white">฿0.00</span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] text-slate-400">SITE</span>
+                                <span id="total_income_site" class="text-sm sm:text-base font-bold text-emerald-400">฿0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================= -->
+            <!-- SECTION 04: DEDUCTIONS & FINAL NET PAY                        -->
+            <!-- ============================================================= -->
+            <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/60 flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-rose-600">Section 04</span>
+                        <h2 class="font-display text-base font-bold text-slate-900">Deductions</h2>
+                    </div>
+                    <div class="hidden sm:grid grid-cols-2 gap-4 w-72 text-center text-xs font-bold">
+                        <span class="text-blue-700 bg-blue-50 py-1 rounded-lg">HO (Silom)</span>
+                        <span class="text-emerald-700 bg-emerald-50 py-1 rounded-lg">SITE</span>
+                    </div>
+                </div>
+
+                <div class="divide-y divide-slate-100">
+                    <!-- (1) Social Security Fund (SSO) -->
+                    <div class="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
+                        <div>
+                            <div class="text-sm font-semibold text-slate-800">(1) Social Security (SSO)</div>
+                            <label class="inline-flex items-center gap-2 mt-1 cursor-pointer select-none">
+                                <input type="checkbox" id="sso_auto" data-key="sso_auto" class="w-3.5 h-3.5 rounded text-indigo-600 border-slate-300 focus:ring-0">
+                                <span class="text-xs text-slate-500">Auto-calculate 5% (Max ฿875.00 when Base > 0)</span>
+                            </label>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 sm:w-72">
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-blue-600 mb-1">HO (Silom)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="1" min="0" id="sso_ho" data-key="sso_ho" value="875"
+                                        class="pill-input w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-emerald-600 mb-1">SITE</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="1" min="0" id="sso_site" data-key="sso_site" value="875"
+                                        class="pill-input pill-input-site w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- (2) Provident Fund (PVD) -->
+                    <div class="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <div>
+                                <div class="text-sm font-semibold text-slate-800">(2) Provident Fund (PVD)</div>
+                                <div class="text-xs text-slate-400">Percentage of Base Salary</div>
+                            </div>
+                            <div class="flex items-center bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-1">
+                                <input type="number" step="0.5" min="0" max="15" id="pvd_percent" data-key="pvd_percent" value="5"
+                                    class="w-12 bg-transparent text-right text-sm font-bold tabular-nums text-slate-900 focus:outline-none">
+                                <span class="text-xs font-bold text-slate-500 ml-0.5">%</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 sm:w-72 text-right tabular-nums">
+                            <div class="bg-slate-50 border border-slate-200/70 rounded-xl py-2 px-3">
+                                <span class="block sm:hidden text-[10px] font-bold text-blue-600 text-left">HO (Silom)</span>
+                                <span id="pvd_ho" class="text-sm font-semibold text-slate-700">฿0.00</span>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-200/70 rounded-xl py-2 px-3">
+                                <span class="block sm:hidden text-[10px] font-bold text-emerald-600 text-left">SITE</span>
+                                <span id="pvd_site" class="text-sm font-semibold text-slate-700">฿0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- (3) Withholding Tax -->
+                    <div class="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
+                        <div>
+                            <div class="text-sm font-semibold text-slate-800">(3) Withholding Tax</div>
+                            <div class="text-xs text-slate-400">Estimated monthly income tax (PND.1)</div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 sm:w-72">
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-blue-600 mb-1">HO (Silom)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="100" min="0" id="tax_ho" data-key="tax_ho" value="0"
+                                        class="pill-input w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-emerald-600 mb-1">SITE</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="100" min="0" id="tax_site" data-key="tax_site" value="0"
+                                        class="pill-input pill-input-site w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- (4) Student Loan (SLF) -->
+                    <div class="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-semibold text-slate-800">(4) Student Loan (SLF)</span>
+                                <span class="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200/80 text-[10px] font-semibold">Payroll Deduct</span>
+                            </div>
+                            <div class="text-xs text-slate-400">Monthly student loan repayment deduction</div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 sm:w-72">
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-blue-600 mb-1">HO (Silom)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="100" min="0" id="slf_ho" data-key="slf_ho" value="0"
+                                        class="pill-input w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-emerald-600 mb-1">SITE</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="100" min="0" id="slf_site" data-key="slf_site" value="0"
+                                        class="pill-input pill-input-site w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- (5) Other Deductions -->
+                    <div class="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
+                        <div class="flex-1 pr-2">
+                            <div class="text-sm font-semibold text-slate-800">(5) Other Deductions</div>
+                            <input type="text" id="other_deduct_note" data-key="other_deduct_note" value="Group insurance / Cooperative / Loan" placeholder="Specify deduction item..."
+                                class="mt-1 w-full max-w-xs bg-transparent border-b border-dashed border-slate-300 focus:border-rose-500 text-xs text-slate-500 focus:text-slate-800 focus:outline-none py-0.5">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 sm:w-72">
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-blue-600 mb-1">HO (Silom)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="100" min="0" id="other_deduct_ho" data-key="other_deduct_ho" value="0"
+                                        class="pill-input w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block sm:hidden text-[10px] font-bold text-emerald-600 mb-1">SITE</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                    <input type="number" step="100" min="0" id="other_deduct_site" data-key="other_deduct_site" value="0"
+                                        class="pill-input pill-input-site w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Custom Extra Deductions Container -->
+                    <div id="customDeductList" class="divide-y divide-slate-100"></div>
+
+                    <!-- Add Custom Deduction Row Bar -->
+                    <div class="px-5 py-2.5 bg-slate-50/40 flex items-center justify-between gap-2">
+                        <span class="text-xs text-slate-400">Add additional recurring or one-time deductions</span>
+                        <button type="button" onclick="addCustomRow('deduct')"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold transition border border-rose-200/70 shrink-0">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Custom Deduction
+                        </button>
+                    </div>
+
+                    <!-- Total Deductions Summary Row -->
+                    <div class="px-5 py-3 bg-rose-50/60 flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wider text-rose-800">Total Deductions</span>
+                        <div class="grid grid-cols-2 gap-4 sm:w-72 text-right tabular-nums">
+                            <div>
+                                <span id="total_deduct_ho" class="text-sm font-bold text-rose-700">฿0.00</span>
+                            </div>
+                            <div>
+                                <span id="total_deduct_site" class="text-sm font-bold text-rose-700">฿0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Final Net Take-Home Summary Row -->
+                    <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
+                        <div>
+                            <span class="block text-xs sm:text-sm font-extrabold uppercase tracking-wider text-white">Net Take-Home Pay</span>
+                            <span class="text-[11px] text-slate-400">Gross Income minus Total Deductions</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 sm:w-72 text-right tabular-nums">
+                            <div>
+                                <span class="block text-[10px] text-blue-300 font-semibold">HO (Silom)</span>
+                                <span id="net_income_ho" class="font-display text-base sm:text-lg font-extrabold text-white">฿0.00</span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] text-emerald-300 font-semibold">SITE</span>
+                                <span id="net_income_site" class="font-display text-base sm:text-lg font-extrabold text-emerald-400">฿0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="text-center text-xs text-slate-400 pb-6">
+                Inputs are saved locally in your browser via localStorage.
+            </footer>
+        </main>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODALS & TOAST NOTIFICATIONS                                          -->
+    <!-- ===================================================================== -->
+    <!-- Reset Confirmation Modal -->
+    <div id="resetModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-xs w-full p-6 shadow-2xl text-center border border-slate-100">
+            <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+            </div>
+            <h3 class="font-display text-base font-bold text-slate-900 mb-1">Reset to Default Values?</h3>
+            <p class="text-xs text-slate-500 mb-5">This will restore default allowances while keeping Base Salary and OT inputs at 0.</p>
+            <div class="flex gap-2">
+                <button type="button" onclick="closeResetModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">Cancel</button>
+                <button type="button" onclick="executeReset()" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold transition">Reset Defaults</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toastBox" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl text-xs font-medium flex items-center gap-2.5 border border-slate-800">
+        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+        <span id="toastText">Default values restored</span>
+    </div>
+
+    <script>
+        // =====================================================================
+        // STATE & DEFAULT CONFIGURATION
+        // =====================================================================
+        const STORAGE_KEY_DATA = 'salary_calc_custom_defaults_v2';
+
+        const DEFAULT_DATA = {
+            base_ho: 0,
+            base_site: 0,
+            travel_ho: 2000,
+            travel_site: 1700,
+            phone_ho: 0,
+            phone_site: 0,
+            upcountry_ho: 0,
+            upcountry_site: 1500,
+            housing_ho: 0,
+            housing_site: 5000,
+            ot_10_hrs: 0,
+            ot_15_hrs: 0,
+            ot_30_hrs: 0,
+            ot_food_days: 0,
+            ot_taxi_days: 0,
+            fuel_mode_ho: "direct",
+            fuel_km_ho: 0,
+            fuel_rate_ho: 0,
+            fuel_ho: 0,
+            fuel_mode_site: "direct",
+            fuel_km_site: 0,
+            fuel_rate_site: 0,
+            fuel_site: 0,
+            lockton_note: "Medical / Dental / Lockton reimbursement",
+            lockton_ho: 0,
+            lockton_site: 0,
+            sso_auto: false,
+            sso_ho: 875,
+            sso_site: 875,
+            pvd_percent: 5,
+            tax_ho: 0,
+            tax_site: 0,
+            slf_ho: 0,
+            slf_site: 0,
+            other_deduct_note: "Group insurance / Cooperative / Loan",
+            other_deduct_ho: 0,
+            other_deduct_site: 0,
+            custom_incomes: [],
+            custom_deducts: []
+        };
+
+        let customIncomes = [];
+        let customDeducts = [];
+
+        // =====================================================================
+        // DYNAMIC CUSTOM INCOME & DEDUCTION ROWS
+        // =====================================================================
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function addCustomRow(type, item = null) {
+            const newItem = item || {
+                id: 'row_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                label: type === 'income' ? 'Extra Claim / Bonus' : 'Extra Deduction',
+                ho: 0,
+                site: 0
+            };
+            if (type === 'income') {
+                customIncomes.push(newItem);
+            } else {
+                customDeducts.push(newItem);
+            }
+            renderCustomRows(type);
+            calculateAll();
+        }
+
+        function removeCustomRow(type, id) {
+            if (type === 'income') {
+                customIncomes = customIncomes.filter(r => r.id !== id);
+            } else {
+                customDeducts = customDeducts.filter(r => r.id !== id);
+            }
+            renderCustomRows(type);
+            calculateAll();
+        }
+
+        function updateCustomRow(type, id, field, value) {
+            const list = type === 'income' ? customIncomes : customDeducts;
+            const target = list.find(r => r.id === id);
+            if (!target) return;
+            target[field] = field === 'label' ? value : (parseFloat(value) || 0);
+            calculateAll();
+        }
+
+        function renderCustomRows(type) {
+            const containerId = type === 'income' ? 'customIncomeList' : 'customDeductList';
+            const list = type === 'income' ? customIncomes : customDeducts;
+            const startIndex = type === 'income' ? 11 : 6;
+            const badgeClass = type === 'income'
+                ? 'bg-indigo-50 text-indigo-700 border-indigo-200/80'
+                : 'bg-rose-50 text-rose-700 border-rose-200/80';
+            const badgeText = type === 'income' ? 'Custom Income' : 'Custom Deduct';
+
+            const container = document.getElementById(containerId);
+            container.innerHTML = list.map((row, idx) => `
+                <div class="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/30 hover:bg-slate-50/70 transition">
+                    <div class="flex-1 flex items-center gap-2 pr-2">
+                        <button type="button" onclick="removeCustomRow('${type}', '${row.id}')" title="Remove row"
+                            class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center transition shrink-0">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-slate-400">(${startIndex + idx})</span>
+                                <input type="text" value="${escapeHtml(row.label)}"
+                                    oninput="updateCustomRow('${type}', '${row.id}', 'label', this.value)"
+                                    placeholder="Item name..."
+                                    class="w-full max-w-xs bg-transparent border-b border-slate-300 focus:border-indigo-500 text-sm font-semibold text-slate-800 focus:outline-none py-0.5">
+                                <span class="hidden md:inline-block px-2 py-0.5 rounded-full border text-[10px] font-semibold ${badgeClass}">${badgeText}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 sm:w-72">
+                        <div>
+                            <label class="block sm:hidden text-[10px] font-bold text-blue-600 mb-1">HO (Silom)</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                <input type="number" step="100" min="0" value="${row.ho}"
+                                    oninput="updateCustomRow('${type}', '${row.id}', 'ho', this.value)"
+                                    class="pill-input w-full bg-white border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block sm:hidden text-[10px] font-bold text-emerald-600 mb-1">SITE</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">฿</span>
+                                <input type="number" step="100" min="0" value="${row.site}"
+                                    oninput="updateCustomRow('${type}', '${row.id}', 'site', this.value)"
+                                    class="pill-input pill-input-site w-full bg-white border border-slate-200 rounded-xl py-2 pl-7 pr-3 text-right text-sm font-semibold tabular-nums text-slate-900">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+
+        // =====================================================================
+        // INTERACTIVE STEPPER & FUEL MODE CONTROLS
+        // =====================================================================
+        function stepHours(id, delta) {
+            const input = document.getElementById(id);
+            const current = parseFloat(input.value) || 0;
+            const next = Math.max(0, current + delta);
+            input.value = next;
+            calculateAll();
+        }
+
+        function setFuelColMode(col, mode) {
+            document.getElementById(`fuel_mode_${col}`).value = mode;
+            const directBtn = document.getElementById(`fuel_mode_${col}_direct`);
+            const rateBtn = document.getElementById(`fuel_mode_${col}_rate`);
+            const rateBox = document.getElementById(`fuel_rate_box_${col}`);
+            const totalInput = document.getElementById(`fuel_${col}`);
+            const subLabel = document.getElementById(`fuel_sublabel_${col}`);
+
+            const activeTextClass = col === 'site' ? 'text-emerald-900' : 'text-slate-900';
+            const inactiveTextClass = col === 'site' ? 'text-emerald-700' : 'text-slate-600';
+
+            if (mode === 'rate') {
+                rateBtn.classList.add('bg-white', activeTextClass, 'shadow-2xs');
+                rateBtn.classList.remove(inactiveTextClass);
+                directBtn.classList.remove('bg-white', activeTextClass, 'shadow-2xs');
+                directBtn.classList.add(inactiveTextClass);
+
+                rateBox.classList.remove('hidden');
+                rateBox.classList.add('grid');
+                totalInput.readOnly = true;
+                totalInput.classList.add('bg-slate-100/80', 'cursor-default');
+                subLabel.textContent = 'Calculated (km × ฿/km)';
+            } else {
+                directBtn.classList.add('bg-white', activeTextClass, 'shadow-2xs');
+                directBtn.classList.remove(inactiveTextClass);
+                rateBtn.classList.remove('bg-white', activeTextClass, 'shadow-2xs');
+                rateBtn.classList.add(inactiveTextClass);
+
+                rateBox.classList.add('hidden');
+                rateBox.classList.remove('grid');
+                totalInput.readOnly = false;
+                totalInput.classList.remove('bg-slate-100/80', 'cursor-default');
+                subLabel.textContent = 'Monthly fuel amount';
+                document.getElementById(`fuel_formula_${col}`).textContent = '';
+            }
+            calculateAll();
+        }
+
+        // =====================================================================
+        // FORMATTING & EXACT FINANCIAL CALCULATION ENGINE
+        // =====================================================================
+        function formatNum(num) {
+            if (isNaN(num) || num === null) num = 0;
+            return Number(num).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function formatCurrency(num) {
+            return `฿${formatNum(num)}`;
+        }
+
+        function getNum(id) {
+            const val = parseFloat(document.getElementById(id).value);
+            return isNaN(val) ? 0 : val;
+        }
+
+        function calculateAll() {
+            // 1. Base & Fixed Allowances (1) to (5)
+            const base_ho = getNum('base_ho');
+            const base_site = getNum('base_site');
+            const travel_ho = getNum('travel_ho');
+            const travel_site = getNum('travel_site');
+            const phone_ho = getNum('phone_ho');
+            const phone_site = getNum('phone_site');
+            const upcountry_ho = getNum('upcountry_ho');
+            const upcountry_site = getNum('upcountry_site');
+            const housing_ho = getNum('housing_ho');
+            const housing_site = getNum('housing_site');
+
+            const fixedHo = base_ho + travel_ho + phone_ho + upcountry_ho + housing_ho;
+            const fixedSite = base_site + travel_site + phone_site + upcountry_site + housing_site;
+
+            // 2. OT Hourly Base [(1)-(4) / 240]
+            const otBaseHo = base_ho + travel_ho + phone_ho + upcountry_ho;
+            const otBaseSite = base_site + travel_site + phone_site + upcountry_site;
+
+            const hourlyRateHo = otBaseHo / 240;
+            const hourlyRateSite = otBaseSite / 240;
+
+            document.getElementById('rate_ho_disp').textContent = formatNum(hourlyRateHo);
+            document.getElementById('rate_site_disp').textContent = formatNum(hourlyRateSite);
+
+            const hrs10 = getNum('ot_10_hrs');
+            const hrs15 = getNum('ot_15_hrs');
+            const hrs30 = getNum('ot_30_hrs');
+            const totalOtHrs = hrs10 + hrs15 + hrs30;
+
+            // Update 70-Hour Cap Progress Bar
+            const pctCap = Math.min((totalOtHrs / 70) * 100, 100);
+            const rawPct = ((totalOtHrs / 70) * 100).toFixed(1);
+            const capBar = document.getElementById('otCapBar');
+            const capText = document.getElementById('otCapStatusText');
+            const warningMsg = document.getElementById('otWarningMsg');
+
+            capBar.style.width = `${pctCap}%`;
+            capText.textContent = `${totalOtHrs} / 70 hrs (${rawPct}%)`;
+
+            if (totalOtHrs > 70) {
+                capBar.className = 'h-full bg-rose-500 rounded-full transition-all duration-300';
+                capText.className = 'font-bold tabular-nums text-rose-600';
+                warningMsg.classList.remove('hidden');
+            } else if (totalOtHrs >= 60) {
+                capBar.className = 'h-full bg-amber-500 rounded-full transition-all duration-300';
+                capText.className = 'font-bold tabular-nums text-amber-600';
+                warningMsg.classList.add('hidden');
+            } else {
+                capBar.className = 'h-full bg-indigo-500 rounded-full transition-all duration-300';
+                capText.className = 'font-bold tabular-nums text-indigo-600';
+                warningMsg.classList.add('hidden');
+            }
+
+            // Shift Payouts (1.0x -> 1.5x -> 3.0x)
+            const ot10Ho = hourlyRateHo * 1.0 * hrs10;
+            const ot10Site = hourlyRateSite * 1.0 * hrs10;
+
+            const ot15Ho = hourlyRateHo * 1.5 * hrs15;
+            const ot15Site = hourlyRateSite * 1.5 * hrs15;
+
+            const ot30Ho = hourlyRateHo * 3.0 * hrs30;
+            const ot30Site = hourlyRateSite * 3.0 * hrs30;
+
+            const otTotalHo = ot10Ho + ot15Ho + ot30Ho;
+            const otTotalSite = ot10Site + ot15Site + ot30Site;
+
+            document.getElementById('ot_10_ho').textContent = formatCurrency(ot10Ho);
+            document.getElementById('ot_10_site').textContent = formatCurrency(ot10Site);
+            document.getElementById('ot_15_ho').textContent = formatCurrency(ot15Ho);
+            document.getElementById('ot_15_site').textContent = formatCurrency(ot15Site);
+            document.getElementById('ot_30_ho').textContent = formatCurrency(ot30Ho);
+            document.getElementById('ot_30_site').textContent = formatCurrency(ot30Site);
+
+            document.getElementById('ot_total_ho').textContent = formatCurrency(otTotalHo);
+            document.getElementById('ot_total_site').textContent = formatCurrency(otTotalSite);
+
+            // 3. Daily Allowances & Fuel (7)-(9)
+            const foodDays = getNum('ot_food_days');
+            const foodHo = foodDays * 50;
+            const foodSite = foodDays * 50;
+            document.getElementById('ot_food_ho').textContent = formatCurrency(foodHo);
+            document.getElementById('ot_food_site').textContent = formatCurrency(foodSite);
+
+            const taxiDays = getNum('ot_taxi_days');
+            const taxiHo = taxiDays * 100;
+            const taxiSite = taxiDays * 100;
+            document.getElementById('ot_taxi_ho').textContent = formatCurrency(taxiHo);
+            document.getElementById('ot_taxi_site').textContent = formatCurrency(taxiSite);
+
+            // Flexible Variable Fuel Calculation per Column (HO & SITE)
+            ['ho', 'site'].forEach(col => {
+                const mode = document.getElementById(`fuel_mode_${col}`).value;
+                const formulaEl = document.getElementById(`fuel_formula_${col}`);
+                if (mode === 'rate') {
+                    const km = getNum(`fuel_km_${col}`);
+                    const rate = getNum(`fuel_rate_${col}`);
+                    const calc = km * rate;
+                    document.getElementById(`fuel_${col}`).value = calc;
+                    formulaEl.textContent = `${km.toLocaleString('en-US')} km × ฿${rate}`;
+                } else {
+                    formulaEl.textContent = '';
+                }
+            });
+            const fuelHo = getNum('fuel_ho');
+            const fuelSite = getNum('fuel_site');
+
+            // (10) Insurance / Lockton Claim + Custom Extra Incomes
+            const locktonHo = getNum('lockton_ho');
+            const locktonSite = getNum('lockton_site');
+            const customIncomeHo = customIncomes.reduce((sum, r) => sum + (parseFloat(r.ho) || 0), 0);
+            const customIncomeSite = customIncomes.reduce((sum, r) => sum + (parseFloat(r.site) || 0), 0);
+
+            const variableHo = otTotalHo + foodHo + taxiHo + fuelHo + locktonHo + customIncomeHo;
+            const variableSite = otTotalSite + foodSite + taxiSite + fuelSite + locktonSite + customIncomeSite;
+
+            // Gross Income
+            const totalIncomeHo = fixedHo + variableHo;
+            const totalIncomeSite = fixedSite + variableSite;
+
+            document.getElementById('total_income_ho').textContent = formatCurrency(totalIncomeHo);
+            document.getElementById('total_income_site').textContent = formatCurrency(totalIncomeSite);
+
+            // 4. Deductions
+            const isSsoAuto = document.getElementById('sso_auto').checked;
+            let ssoHo = getNum('sso_ho');
+            let ssoSite = getNum('sso_site');
+
+            if (isSsoAuto) {
+                ssoHo = base_ho > 0 ? Math.min(base_ho * 0.05, 875) : 0;
+                ssoSite = base_site > 0 ? Math.min(base_site * 0.05, 875) : 0;
+                document.getElementById('sso_ho').value = ssoHo;
+                document.getElementById('sso_site').value = ssoSite;
+            }
+
+            const pvdPercent = getNum('pvd_percent');
+            const pvdHo = base_ho * (pvdPercent / 100);
+            const pvdSite = base_site * (pvdPercent / 100);
+            document.getElementById('pvd_ho').textContent = formatCurrency(pvdHo);
+            document.getElementById('pvd_site').textContent = formatCurrency(pvdSite);
+
+            const taxHo = getNum('tax_ho');
+            const taxSite = getNum('tax_site');
+
+            // (4) Student Loan (SLF) & (5) Other Deductions + Custom Deductions
+            const slfHo = getNum('slf_ho');
+            const slfSite = getNum('slf_site');
+            const otherDeductHo = getNum('other_deduct_ho');
+            const otherDeductSite = getNum('other_deduct_site');
+            const customDeductHo = customDeducts.reduce((sum, r) => sum + (parseFloat(r.ho) || 0), 0);
+            const customDeductSite = customDeducts.reduce((sum, r) => sum + (parseFloat(r.site) || 0), 0);
+
+            const totalDeductHo = ssoHo + pvdHo + taxHo + slfHo + otherDeductHo + customDeductHo;
+            const totalDeductSite = ssoSite + pvdSite + taxSite + slfSite + otherDeductSite + customDeductSite;
+
+            document.getElementById('total_deduct_ho').textContent = formatCurrency(totalDeductHo);
+            document.getElementById('total_deduct_site').textContent = formatCurrency(totalDeductSite);
+
+            // Net Take-Home Pay
+            const netHo = totalIncomeHo - totalDeductHo;
+            const netSite = totalIncomeSite - totalDeductSite;
+            const diff = netSite - netHo;
+            const diffPct = netHo > 0 ? ((diff / netHo) * 100).toFixed(1) : '0.0';
+
+            document.getElementById('net_income_ho').textContent = formatCurrency(netHo);
+            document.getElementById('net_income_site').textContent = formatCurrency(netSite);
+
+            // Update Hero Cards
+            document.getElementById('hero_net_ho').textContent = formatCurrency(netHo);
+            document.getElementById('hero_gross_ho').textContent = formatCurrency(totalIncomeHo);
+            document.getElementById('hero_deduct_ho').textContent = `-${formatCurrency(totalDeductHo)}`;
+
+            document.getElementById('hero_net_site').textContent = formatCurrency(netSite);
+            document.getElementById('hero_gross_site').textContent = formatCurrency(totalIncomeSite);
+            document.getElementById('hero_deduct_site').textContent = `-${formatCurrency(totalDeductSite)}`;
+
+            const diffEl = document.getElementById('hero_diff_amount');
+            const diffPctEl = document.getElementById('hero_diff_pct');
+            if (diff > 0) {
+                diffEl.textContent = `+${formatCurrency(diff)}`;
+                diffEl.className = 'font-display text-2xl sm:text-3xl font-extrabold text-emerald-400 tabular-nums tracking-tight';
+                diffPctEl.textContent = `+${diffPct}%`;
+                diffPctEl.className = 'px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold tabular-nums';
+            } else if (diff < 0) {
+                diffEl.textContent = `-${formatCurrency(Math.abs(diff))}`;
+                diffEl.className = 'font-display text-2xl sm:text-3xl font-extrabold text-rose-400 tabular-nums tracking-tight';
+                diffPctEl.textContent = `${diffPct}%`;
+                diffPctEl.className = 'px-2.5 py-0.5 rounded-full bg-rose-500/20 border border-rose-400/30 text-rose-300 text-xs font-bold tabular-nums';
+            } else {
+                diffEl.textContent = '฿0.00';
+                diffEl.className = 'font-display text-2xl sm:text-3xl font-extrabold text-slate-200 tabular-nums tracking-tight';
+                diffPctEl.textContent = '0.0%';
+                diffPctEl.className = 'px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-xs font-bold tabular-nums';
+            }
+
+            // Update Visual Breakdown Bars
+            const hoBaseRatio = totalIncomeHo > 0 ? Math.round((fixedHo / totalIncomeHo) * 100) : 0;
+            const hoOtRatio = totalIncomeHo > 0 ? (100 - hoBaseRatio) : 0;
+            document.getElementById('bar_ho_base').style.width = `${hoBaseRatio}%`;
+            document.getElementById('bar_ho_ot').style.width = `${hoOtRatio}%`;
+            document.getElementById('bar_label_ho').textContent = `Fixed ${hoBaseRatio}% • Variable ${hoOtRatio}%`;
+
+            const siteBaseRatio = totalIncomeSite > 0 ? Math.round((fixedSite / totalIncomeSite) * 100) : 0;
+            const siteOtRatio = totalIncomeSite > 0 ? (100 - siteBaseRatio) : 0;
+            document.getElementById('bar_site_base').style.width = `${siteBaseRatio}%`;
+            document.getElementById('bar_site_ot').style.width = `${siteOtRatio}%`;
+            document.getElementById('bar_label_site').textContent = `Fixed ${siteBaseRatio}% • Variable ${siteOtRatio}%`;
+
+            saveDataToStorage();
+        }
+
+        // =====================================================================
+        // STORAGE PERSISTENCE & UTILITIES
+        // =====================================================================
+        function saveDataToStorage() {
+            const data = {};
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.getAttribute('data-key');
+                data[key] = el.type === 'checkbox' ? el.checked : el.value;
+            });
+            data.custom_incomes = customIncomes;
+            data.custom_deducts = customDeducts;
+            localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(data));
+        }
+
+        function loadDataFromStorage() {
+            const savedRaw = localStorage.getItem(STORAGE_KEY_DATA);
+            const data = savedRaw ? { ...DEFAULT_DATA, ...JSON.parse(savedRaw) } : DEFAULT_DATA;
+
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.getAttribute('data-key');
+                if (data[key] !== undefined) {
+                    if (el.type === 'checkbox') {
+                        el.checked = Boolean(data[key]);
+                    } else {
+                        el.value = data[key];
+                    }
+                }
+            });
+
+            customIncomes = Array.isArray(data.custom_incomes) ? data.custom_incomes : [];
+            customDeducts = Array.isArray(data.custom_deducts) ? data.custom_deducts : [];
+            renderCustomRows('income');
+            renderCustomRows('deduct');
+
+            // Sync Fuel Mode button highlights per column
+            setFuelColMode('ho', String(data.fuel_mode_ho || 'direct'));
+            setFuelColMode('site', String(data.fuel_mode_site || 'direct'));
+
+            calculateAll();
+        }
+
+        function confirmReset() {
+            const modal = document.getElementById('resetModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeResetModal() {
+            const modal = document.getElementById('resetModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function executeReset() {
+            localStorage.removeItem(STORAGE_KEY_DATA);
+            loadDataFromStorage();
+            closeResetModal();
+            showToast('Default values restored');
+        }
+
+        let toastTimer;
+        function showToast(message) {
+            const toast = document.getElementById('toastBox');
+            document.getElementById('toastText').textContent = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        // =====================================================================
+        // INITIALIZATION
+        // =====================================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            document.querySelectorAll('[data-key]').forEach(el => {
+                el.addEventListener('input', () => {
+                    if (el.id === 'sso_ho' || el.id === 'sso_site') {
+                        document.getElementById('sso_auto').checked = false;
+                    }
+                    calculateAll();
+                });
+                el.addEventListener('change', calculateAll);
+            });
+
+            loadDataFromStorage();
+        });
+    </script>
+</body>
+</html>
